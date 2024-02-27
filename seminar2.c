@@ -13,6 +13,7 @@ struct Farmacie initFarmacie(int id, const char* nume, float suprafata) {
 	f.nume = (char*)malloc(sizeof(char*) * (strlen(nume) + 1));
 	strcpy(f.nume, nume);
 	f.suprafata = suprafata;
+	return f;
 }
 
 void afisareFarmacie(struct Farmacie f) {
@@ -33,6 +34,48 @@ struct Farmacie* copiazaNElemente(struct Farmacie* vector, int nrFarmacii, int n
 		}
 		return copiat;
 	}
+	else {
+		return NULL;
+	}
+}
+
+struct Farmacie* copiazaFarmMici(struct Farmacie* farmacii, int nrFarm, float pragSupraf, int* nrFarmMici) {
+	*nrFarmMici = 0;
+	for (int i = 0; i < nrFarm; i++) {
+		if (farmacii[i].suprafata < pragSupraf) {
+			(*nrFarmMici)++;
+		}
+	}
+	struct Farmacie* vector = (struct Farmacie*)malloc(sizeof(struct Farmacie) * (*nrFarmMici));
+
+	int k = 0;
+	for (int i = 0; i < nrFarm; i++) {
+		if (farmacii[i].suprafata < pragSupraf) {
+			vector[k++] = initFarmacie(farmacii[i].id, farmacii[i].nume, farmacii[i].suprafata);
+		}
+	}
+	return vector;
+}
+
+void dezalocareVectFarm(struct Farmacie** vector, int* nrFarm) {
+	for (int i = 0; i < (*nrFarm); i++){
+		free((*vector)[i].nume);
+	}
+
+	free(*vector);
+	*nrFarm = 0;
+	*vector = NULL;
+}
+
+struct Farmacie getFarmacieByID(struct Farmacie* vector, int nrFarm, int idCautat) {
+	for (int i = 0; i < nrFarm; i++) {
+		if (vector[i].id == idCautat) {
+			//returnam cu deep copy
+			return initFarmacie(vector[i].id, vector[i].nume, vector[i].suprafata);
+		}
+	}
+
+	return initFarmacie(0, "n/a", 0);
 }
 
 int main() {
@@ -52,4 +95,23 @@ int main() {
 	struct Farmacie* farmaciiCopiate = copiazaNElemente(farmacii, nrFarmacii, nrFramaciiCopiate);
 	printf("\n\n");
 	afisareVector(farmaciiCopiate, nrFramaciiCopiate);
+
+	int nrFarmMici = 0;
+
+	farmacii[3].suprafata = 20;
+	struct Farmacie* farmaciiMici = copiazaFarmMici(farmacii, nrFarmacii, 50,&nrFarmMici);
+	printf("\n\n");
+	afisareVector(farmaciiMici, nrFarmMici);
+
+
+	struct Farmacie farmCautata = getFarmacieByID(farmacii, nrFarmacii, 10);
+	printf("\nFarmacie cautata:\n");
+	afisareFarmacie(farmCautata);
+	free(farmCautata.nume);
+
+	dezalocareVectFarm(&farmacii, &nrFarmacii);
+	dezalocareVectFarm(&farmaciiCopiate, &nrFramaciiCopiate);
+	dezalocareVectFarm(&farmaciiMici, &nrFarmMici);
+
+
 }
